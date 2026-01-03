@@ -1,0 +1,339 @@
+{
+  "info": {
+    "name": "Codeforces POTD Tracker API",
+    "description": "Complete API collection for Codeforces Daily POTD Tracker",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "cp360"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        },
+        "description": "Check if server is running"
+      },
+      "response": []
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Sign Up",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.token) {",
+                  "        pm.environment.set('token', jsonData.data.token);",
+                  "        console.log('Token saved to environment');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"codeforces_handle\": \"tourist\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "signup"]
+            },
+            "description": "Register a new user with email, password, and Codeforces handle"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.token) {",
+                  "        pm.environment.set('token', jsonData.data.token);",
+                  "        console.log('Token saved to environment');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Login with email and password"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "POTD",
+      "item": [
+        {
+          "name": "Get Today's POTD",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/potd/today",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "potd", "today"]
+            },
+            "description": "Get today's Problem of the Day (public endpoint, auto-generates if missing)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get POTD by Date",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/potd/date/{{date}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "potd", "date", "{{date}}"]
+            },
+            "description": "Get POTD for a specific date (format: YYYY-MM-DD)"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate POTD",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-01-15\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/potd/generate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "potd", "generate"]
+            },
+            "description": "Manually generate POTD for a specific date (requires authentication)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Progress",
+      "item": [
+        {
+          "name": "Get Progress for Date",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/progress/date/{{date}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "progress", "date", "{{date}}"]
+            },
+            "description": "Get solve status for Easy, Medium, Hard problems for a specific date"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Progress Range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/progress/range?from={{from_date}}&to={{to_date}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "progress", "range"],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{from_date}}",
+                  "description": "Start date (YYYY-MM-DD)"
+                },
+                {
+                  "key": "to",
+                  "value": "{{to_date}}",
+                  "description": "End date (YYYY-MM-DD)"
+                }
+              ]
+            },
+            "description": "Get solve status for a date range"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Heatmap",
+      "item": [
+        {
+          "name": "Get Heatmap",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/heatmap?from={{from_date}}&to={{to_date}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "heatmap"],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{from_date}}",
+                  "description": "Start date (YYYY-MM-DD)"
+                },
+                {
+                  "key": "to",
+                  "value": "{{to_date}}",
+                  "description": "End date (YYYY-MM-DD)"
+                }
+              ]
+            },
+            "description": "Get week-wise heatmap data with 3 boxes per day (Easy, Medium, Hard)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "profile"]
+            },
+            "description": "Get current user's profile"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codeforces_handle\": \"new_handle\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "profile"]
+            },
+            "description": "Update user profile (e.g., Codeforces handle)"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "date",
+      "value": "2026-01-15",
+      "type": "string"
+    },
+    {
+      "key": "from_date",
+      "value": "2026-01-01",
+      "type": "string"
+    },
+    {
+      "key": "to_date",
+      "value": "2026-01-31",
+      "type": "string"
+    }
+  ]
+}
+

@@ -1,0 +1,15 @@
+
+# Node modules
+node_modules/
+
+# Environment Variables
+.env
+
+# IDE files
+.idea/
+
+# Log Files
+combined.log
+
+#sequelize files
+src/config/config.json
