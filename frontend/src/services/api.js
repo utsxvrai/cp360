@@ -72,8 +72,8 @@ class ApiService {
   }
 
   // Heatmap endpoint
-  async getHeatmap(from, to) {
-    return this.request(`/heatmap?from=${from}&to=${to}`);
+  async getHeatmap(from, to, refresh = false) {
+    return this.request(`/heatmap?from=${from}&to=${to}${refresh ? '&refresh=true' : ''}`);
   }
 
   // Profile endpoints

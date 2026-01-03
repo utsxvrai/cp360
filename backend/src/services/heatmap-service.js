@@ -1,14 +1,30 @@
 const { Logger } = require('../config');
 const ProgressService = require('./progress-service');
+const POTDService = require('./potd-service');
+const { DailyProblemRepository } = require('../repositories');
 const { groupDatesByWeek, getDaysInRange, formatDate } = require('../utils/date-helpers');
 
-const generateHeatmapData = async (userId, fromDate, toDate) => {
+const generateHeatmapData = async (userId, fromDate, toDate, forceRefresh = false) => {
   try {
+    // Ensure today's POTD exists if it's within the range
+    const today = formatDate(new Date());
+    if (toDate >= today && fromDate <= today) {
+      const exists = await DailyProblemRepository.checkDailyProblemSetExists(today);
+      if (!exists) {
+        try {
+          await POTDService.generateDailyPOTD(today);
+        } catch (potdError) {
+          Logger.warn('Auto-generation of POTD for heatmap failed', { date: today, error: potdError.message });
+        }
+      }
+    }
+
     // Compute progress for all dates in range
     const progress = await ProgressService.computeProgressForDateRange(
       userId,
       fromDate,
-      toDate
+      toDate,
+      forceRefresh
     );
 
     // Create a map for quick lookup

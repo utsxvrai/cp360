@@ -60,75 +60,111 @@ const selectProblemsFromContests = (contests, problemsByContest) => {
   return { easyProblem, mediumProblem, hardProblem };
 };
 
+// Keep track of active generations to prevent duplicates
+const activeGenerations = new Map();
+
 const generateDailyPOTD = async (date = null) => {
-  try {
-    const targetDate = date || formatDate(new Date());
-    
-    // Check if POTD already exists for this date
-    const exists = await DailyProblemRepository.checkDailyProblemSetExists(targetDate);
-    if (exists) {
-      Logger.info('POTD already exists for date', { date: targetDate });
-      return await DailyProblemRepository.getDailyProblemSetByDate(targetDate);
-    }
+  const targetDate = date || formatDate(new Date());
 
-    Logger.info('Generating daily POTD', { date: targetDate });
-
-    // Get recent contests
-    const contests = await CodeforcesService.getRecentContests(50);
-    if (contests.length === 0) {
-      throw new Error('No recent contests found');
-    }
-
-    // Fetch problems for each contest
-    const problemsByContest = {};
-    for (const contest of contests) {
-      try {
-        const problems = await CodeforcesService.getContestProblems(contest.id);
-        if (problems && problems.length > 0) {
-          problemsByContest[contest.id] = problems;
-        }
-        // Small delay to respect rate limits
-        await new Promise(resolve => setTimeout(resolve, 100));
-      } catch (error) {
-        Logger.warn('Failed to fetch problems for contest', {
-          contestId: contest.id,
-          error: error.message,
-        });
-      }
-    }
-
-    // Select problems using the algorithm
-    const { easyProblem, mediumProblem, hardProblem } = selectProblemsFromContests(
-      contests,
-      problemsByContest
-    );
-
-    if (!easyProblem || !mediumProblem || !hardProblem) {
-      throw new Error('Could not find problems for all difficulty levels');
-    }
-
-    // Create daily problem set
-    const problemSet = {
-      date: targetDate,
-      easy_contest_id: easyProblem.contestId,
-      easy_index: easyProblem.index,
-      easy_rating: easyProblem.rating,
-      medium_contest_id: mediumProblem.contestId,
-      medium_index: mediumProblem.index,
-      medium_rating: mediumProblem.rating,
-      hard_contest_id: hardProblem.contestId,
-      hard_index: hardProblem.index,
-      hard_rating: hardProblem.rating,
-    };
-
-    const result = await DailyProblemRepository.createDailyProblemSet(problemSet);
-    Logger.info('Daily POTD generated successfully', { date: targetDate });
-    
-    return result;
-  } catch (error) {
-    Logger.error('Generate daily POTD error', { error: error.message });
-    throw error;
+  // If a generation is already in progress for this date, wait for it
+  if (activeGenerations.has(targetDate)) {
+    Logger.info('POTD generation already in progress, waiting...', { date: targetDate });
+    return activeGenerations.get(targetDate);
   }
+
+  // Placeholder to be resolved/rejected by the worker
+  let resolveGen, rejectGen;
+  const promise = new Promise((res, rej) => {
+    resolveGen = res;
+    rejectGen = rej;
+  });
+
+  activeGenerations.set(targetDate, promise);
+
+  // Start the actual generation worker
+  (async () => {
+    try {
+      // Check if POTD already exists for this date
+      const exists = await DailyProblemRepository.checkDailyProblemSetExists(targetDate);
+      if (exists) {
+        Logger.info('POTD already exists for date (checked by worker)', { date: targetDate });
+        const data = await DailyProblemRepository.getDailyProblemSetByDate(targetDate);
+        resolveGen(data);
+        return;
+      }
+
+      Logger.info('Generating daily POTD', { date: targetDate });
+
+      // Get recent contests - use 50 to ensure we find diverse problems
+      const contests = await CodeforcesService.getRecentContests(50);
+      if (contests.length === 0) {
+        throw new Error('No recent contests found from Codeforces API');
+      }
+
+      // Fetch problems for each contest
+      const problemsByContest = {};
+      for (const contest of contests) {
+        try {
+          const problems = await CodeforcesService.getContestProblems(contest.id);
+          if (problems && problems.length > 0) {
+            problemsByContest[contest.id] = problems;
+          }
+          
+          // Early exit check
+          const { easyProblem, mediumProblem, hardProblem } = selectProblemsFromContests(
+            contests,
+            problemsByContest
+          );
+          if (easyProblem && mediumProblem && hardProblem) {
+            Logger.info('Found all required problems early', { date: targetDate, contestCount: Object.keys(problemsByContest).length });
+            break;
+          }
+        } catch (error) {
+          Logger.warn('Failed to fetch problems for contest', {
+            contestId: contest.id,
+            error: error.message,
+          });
+        }
+      }
+
+      // Final problem matching check
+      const { easyProblem, mediumProblem, hardProblem } = selectProblemsFromContests(
+        contests,
+        problemsByContest
+      );
+
+      if (!easyProblem || !mediumProblem || !hardProblem) {
+        throw new Error(`Could not find problems for all difficulty levels after scanning ${Object.keys(problemsByContest).length} contests`);
+      }
+
+      // Create daily problem set
+      const problemSet = {
+        date: targetDate,
+        easy_contest_id: easyProblem.contestId,
+        easy_index: easyProblem.index,
+        easy_rating: easyProblem.rating,
+        medium_contest_id: mediumProblem.contestId,
+        medium_index: mediumProblem.index,
+        medium_rating: mediumProblem.rating,
+        hard_contest_id: hardProblem.contestId,
+        hard_index: hardProblem.index,
+        hard_rating: hardProblem.rating,
+      };
+
+      const result = await DailyProblemRepository.createDailyProblemSet(problemSet);
+      Logger.info('Daily POTD generated successfully', { date: targetDate });
+      
+      resolveGen(result);
+    } catch (error) {
+      Logger.error('Generate daily POTD worker failed', { date: targetDate, error: error.message, stack: error.stack });
+      rejectGen(error);
+    } finally {
+      // Clean up the lock
+      activeGenerations.delete(targetDate);
+    }
+  })();
+
+  return promise;
 };
 
 module.exports = {

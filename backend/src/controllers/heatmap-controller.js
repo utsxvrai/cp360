@@ -3,8 +3,9 @@ const { HeatmapService } = require('../services');
 
 const getHeatmap = async (req, res) => {
   try {
-    const { from, to } = req.query;
+    const { from, to, refresh } = req.query;
     const userId = req.user.userId || req.user.id;
+    const forceRefresh = refresh === 'true' || refresh === true;
 
     if (!from || !to) {
       return res.status(StatusCodes.BAD_REQUEST).json({
@@ -15,7 +16,7 @@ const getHeatmap = async (req, res) => {
       });
     }
 
-    const heatmapData = await HeatmapService.generateHeatmapData(userId, from, to);
+    const heatmapData = await HeatmapService.generateHeatmapData(userId, from, to, forceRefresh);
 
     return res.status(StatusCodes.OK).json({
       success: true,

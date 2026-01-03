@@ -1,6 +1,6 @@
 import { memo } from 'react';
 
-const POTDCard = memo(({ difficulty, contestId, index, rating, onHover }) => {
+const POTDCard = memo(({ difficulty, contestId, index, rating, solved = false }) => {
   const getColorClass = () => {
     const diff = difficulty.toLowerCase();
     if (diff === 'easy') return 'text-retro-easy';
@@ -16,14 +16,18 @@ const POTDCard = memo(({ difficulty, contestId, index, rating, onHover }) => {
 
   return (
     <div
-      className="retro-box cursor-pointer hover:animate-jitter transition-none"
-      onMouseEnter={onHover}
+      className={`retro-card cursor-pointer hover:opacity-90 transition-opacity ${
+        solved ? 'border-retro-accent border-4' : ''
+      }`}
       onClick={handleClick}
     >
-      <div className="mb-2">
+      <div className="mb-2 flex items-center justify-between">
         <span className={`${getColorClass()} text-sm uppercase tracking-wider`}>
           {difficulty}
         </span>
+        {solved && (
+          <span className="text-xs text-retro-easy uppercase font-bold">✓ SOLVED</span>
+        )}
       </div>
       <div className="text-2xl font-bold mb-2">
         {contestId}{index}
@@ -38,4 +42,3 @@ const POTDCard = memo(({ difficulty, contestId, index, rating, onHover }) => {
 POTDCard.displayName = 'POTDCard';
 
 export default POTDCard;
-

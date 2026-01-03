@@ -15,7 +15,7 @@ const HeatmapCell = memo(({ solved, difficulty, date }) => {
       className={`
         w-12 h-12 border-2 border-retro-border
         ${getColorClass()}
-        hover:invert transition-none
+        hover:opacity-80 transition-opacity
         cursor-pointer
       `}
       title={`${date} - ${difficulty}: ${solved ? 'Solved' : 'Not solved'}`}

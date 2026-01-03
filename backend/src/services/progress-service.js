@@ -115,7 +115,7 @@ const computeProgressForDateRange = async (userId, fromDate, toDate, forceRefres
 
 const syncAndComputeProgress = async (userId, date = null) => {
   try {
-    const targetDate = date || new Date().toISOString().split('T')[0];
+    const targetDate = date || formatDate(new Date());
     
     // Recompute progress with force refresh
     const progress = await computeProgressForDate(userId, targetDate, true);

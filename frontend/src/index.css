@@ -12,35 +12,10 @@
     margin: 0;
     padding: 0;
     overflow-x: hidden;
-    transition: background-color 0.2s step-end, color 0.2s step-end;
+    font-family: 'Courier New', 'Courier', monospace;
   }
 
-  /* Inverted theme */
-  [data-theme="inverted"] body {
-    @apply bg-retro-text text-retro-bg;
-  }
-
-  [data-theme="inverted"] * {
-    border-color: #000000;
-  }
-
-  [data-theme="inverted"] .retro-box {
-    @apply bg-retro-text text-retro-bg border-retro-bg;
-  }
-
-  [data-theme="inverted"] .retro-input {
-    @apply bg-retro-text text-retro-bg border-retro-bg;
-  }
-
-  [data-theme="inverted"] .retro-button {
-    @apply bg-retro-text text-retro-bg border-retro-bg;
-  }
-
-  [data-theme="inverted"] .retro-button:hover {
-    @apply bg-retro-bg text-retro-text;
-  }
-
-  /* Retro scanline overlay */
+  /* RetroUI scanline overlay */
   body::before {
     content: '';
     position: fixed;
@@ -50,7 +25,7 @@
     height: 100%;
     background: linear-gradient(
       transparent 50%,
-      rgba(255, 255, 255, 0.03) 50%
+      rgba(0, 0, 0, 0.03) 50%
     );
     background-size: 100% 4px;
     pointer-events: none;
@@ -66,34 +41,58 @@
   
   .retro-box {
     @apply retro-border bg-retro-bg p-4;
+    box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
   }
   
   .retro-input {
-    @apply retro-border bg-retro-bg text-retro-text px-3 py-2 focus:outline-none focus:border-retro-text;
+    @apply retro-border bg-retro-bg text-retro-text px-3 py-2;
+    @apply focus:outline-none;
+    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+  }
+
+  .retro-input:focus {
+    border-color: #fbbf24;
   }
   
   .retro-button {
-    @apply retro-border bg-retro-bg text-retro-text px-6 py-2 uppercase tracking-wider hover:bg-retro-text hover:text-retro-bg transition-none;
+    @apply retro-border bg-retro-accent text-retro-bg px-6 py-2 uppercase tracking-wider;
+    @apply font-bold hover:opacity-90;
+    box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+    transition: opacity 0.2s;
   }
   
   .retro-button:active {
-    @apply transform scale-95;
+    @apply transform translate-x-1 translate-y-1;
+    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+  }
+
+  .retro-button-secondary {
+    @apply retro-border bg-retro-bg text-retro-text px-6 py-2 uppercase tracking-wider;
+    @apply font-bold hover:opacity-90;
+    box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+    transition: opacity 0.2s;
+  }
+
+  .retro-button-secondary:active {
+    @apply transform translate-x-1 translate-y-1;
+    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
   }
   
   .text-retro-muted {
-    color: #aaaaaa;
+    color: #9ca3af;
   }
   
   .text-retro-disabled {
-    color: #555555;
+    color: #4b5563;
   }
 
-  /* Inverted theme adjustments */
-  [data-theme="inverted"] .text-retro-muted {
-    color: #555555;
+  .retro-card {
+    @apply retro-border bg-retro-bg p-6;
+    box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
   }
-  
-  [data-theme="inverted"] .text-retro-disabled {
-    color: #aaaaaa;
+
+  .retro-highlight {
+    @apply bg-retro-accent text-retro-bg px-2 py-1;
+    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
   }
 }

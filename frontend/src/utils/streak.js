@@ -1,3 +1,5 @@
+import { formatDate } from './date';
+
 /**
  * Calculate streak from progress data
  * A day counts if at least ONE problem (Easy OR Medium OR Hard) is solved
@@ -14,7 +16,7 @@ export const calculateStreak = (progressData) => {
   );
 
   let streak = 0;
-  const today = new Date().toISOString().split('T')[0];
+  const today = formatDate(new Date());
   let isActiveToday = false;
 
   // Check today first
@@ -32,7 +34,7 @@ export const calculateStreak = (progressData) => {
     // No data for today, check if yesterday was solved
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    const yesterdayStr = formatDate(yesterday);
     const yesterdayData = sorted.find(p => p.date === yesterdayStr);
     
     if (!yesterdayData || !(yesterdayData.easy || yesterdayData.medium || yesterdayData.hard)) {
@@ -47,7 +49,7 @@ export const calculateStreak = (progressData) => {
   }
 
   for (let i = 0; i < sorted.length; i++) {
-    const dateStr = checkDate.toISOString().split('T')[0];
+    const dateStr = formatDate(checkDate);
     const dayData = sorted.find(p => p.date === dateStr);
     
     if (!dayData) {

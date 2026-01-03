@@ -13,6 +13,7 @@ const Dashboard = () => {
   const [streak, setStreak] = useState({ current: 0, isActiveToday: false });
   const [loading, setLoading] = useState(true);
   const [heatmapKey, setHeatmapKey] = useState(0); // Force heatmap refresh
+  const [potdKey, setPotdKey] = useState(0); // Force POTD refresh
 
   const fetchStreak = useCallback(async () => {
     try {
@@ -40,11 +41,12 @@ const Dashboard = () => {
     try {
       // Sync today's progress
       const today = formatDate(new Date());
-      await api.syncProgress(today);
+      const syncResponse = await api.syncProgress(today);
       
-      // Refresh streak and heatmap
+      // Refresh all components that depend on progress
       await fetchStreak();
       setHeatmapKey(prev => prev + 1); // Force heatmap to refresh
+      setPotdKey(prev => prev + 1); // Force POTD grid to refresh
     } catch (err) {
       console.error('Sync failed:', err);
       throw err;
@@ -66,8 +68,8 @@ const Dashboard = () => {
         <div className="mb-6 flex justify-end">
           <SyncButton onSync={handleSync} />
         </div>
-        <POTDGrid />
-        <Heatmap key={heatmapKey} />
+        <POTDGrid refreshKey={potdKey} />
+        <Heatmap key={heatmapKey} refresh={heatmapKey > 0} />
       </div>
     </div>
   );

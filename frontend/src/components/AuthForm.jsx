@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import ThemeToggle from './ThemeToggle';
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -41,10 +40,7 @@ const AuthForm = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-retro-bg">
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
-      </div>
-      <div className="retro-box w-full max-w-md mx-4">
+      <div className="retro-card w-full max-w-md mx-4">
         <div className="text-center mb-8">
           <h1 className="text-3xl uppercase tracking-widest mb-2">
             {isLogin ? 'LOGIN' : 'REGISTER'}

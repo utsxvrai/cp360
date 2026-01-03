@@ -25,9 +25,11 @@ const makeRequest = async (endpoint, params = {}, forceRefresh = false) => {
 
   // Rate limiting
   const now = Date.now();
-  const timeSinceLastRequest = now - lastRequestTime;
-  if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
-    await delay(MIN_REQUEST_INTERVAL - timeSinceLastRequest);
+  const waitTime = Math.max(0, lastRequestTime + MIN_REQUEST_INTERVAL - now);
+  lastRequestTime = now + waitTime;
+
+  if (waitTime > 0) {
+    await delay(waitTime);
   }
 
   try {

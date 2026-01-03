@@ -18,17 +18,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Retro black & white palette
+        // RetroUI color palette (inverted: white bg, black text)
         retro: {
-          bg: '#000000',
-          text: '#ffffff',
-          border: '#ffffff',
-          muted: '#aaaaaa',
-          disabled: '#555555',
+          bg: '#ffffff',
+          text: '#000000',
+          border: '#000000',
+          accent: '#fbbf24',  // Yellow accent (RetroUI style)
+          muted: '#6b7280',
+          disabled: '#9ca3af',
           // Only allowed colors for difficulty
-          easy: '#00ff00',    // Green
-          medium: '#ff00ff',  // Purple/Magenta
-          hard: '#ff0000',     // Red
+          easy: '#10b981',    // Green
+          medium: '#8b5cf6',  // Purple
+          hard: '#ef4444',     // Red
         },
       },
       fontFamily: {
@@ -67,8 +68,8 @@ export default {
           '100%': { opacity: '1' },
         },
         borderFlash: {
-          '0%, 100%': { borderColor: '#ffffff' },
-          '50%': { borderColor: '#aaaaaa' },
+          '0%, 100%': { borderColor: '#000000' },
+          '50%': { borderColor: '#6b7280' },
         },
         glitch: {
           '0%, 100%': { transform: 'translate(0)' },

@@ -1,6 +1,5 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import ThemeToggle from './ThemeToggle';
 
 const Header = ({ streak, isActiveToday }) => {
   const { user, logout } = useAuth();
@@ -15,8 +14,8 @@ const Header = ({ streak, isActiveToday }) => {
     <header className="retro-border border-b-4 mb-8 pb-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-4xl uppercase tracking-widest mb-2">
-            CODEFORCES POTD
+          <h1 className="text-4xl uppercase tracking-widest mb-2 font-bold">
+            <span className="retro-highlight">CP360</span>
           </h1>
           <div className="text-retro-muted text-sm uppercase">
             {user?.email} | {user?.codeforces_handle?.toUpperCase()}
@@ -43,15 +42,12 @@ const Header = ({ streak, isActiveToday }) => {
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <button
-              onClick={handleLogout}
-              className="retro-button text-sm"
-            >
-              LOGOUT
-            </button>
-          </div>
+          <button
+            onClick={handleLogout}
+            className="retro-button-secondary text-sm"
+          >
+            LOGOUT
+          </button>
         </div>
       </div>
     </header>
