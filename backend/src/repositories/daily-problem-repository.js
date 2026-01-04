@@ -67,10 +67,53 @@ const checkDailyProblemSetExists = async (date) => {
   }
 };
 
+const getRecentDailyProblemSets = async (limit = 10) => {
+  try {
+    const { data, error } = await Supabase
+      .from('daily_problem_sets')
+      .select('*')
+      .order('date', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    Logger.error('Get recent daily problem sets error', {
+      limit,
+      error: error.message,
+    });
+    throw error;
+  }
+};
+
+const getAllUsedProblemKeys = async () => {
+  try {
+    const { data, error } = await Supabase
+      .from('daily_problem_sets')
+      .select('easy_contest_id, easy_index, medium_contest_id, medium_index, hard_contest_id, hard_index');
+
+    if (error) throw error;
+
+    const usedKeys = new Set();
+    data.forEach(row => {
+      usedKeys.add(`${row.easy_contest_id}-${row.easy_index}`);
+      usedKeys.add(`${row.medium_contest_id}-${row.medium_index}`);
+      usedKeys.add(`${row.hard_contest_id}-${row.hard_index}`);
+    });
+
+    return usedKeys;
+  } catch (error) {
+    Logger.error('Get all used problem keys error', { error: error.message });
+    return new Set();
+  }
+};
+
 module.exports = {
   createDailyProblemSet,
   getDailyProblemSetByDate,
   getDailyProblemSetsInRange,
+  getRecentDailyProblemSets,
   checkDailyProblemSetExists,
+  getAllUsedProblemKeys,
 };
 

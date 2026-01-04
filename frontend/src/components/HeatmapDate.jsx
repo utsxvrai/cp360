@@ -10,8 +10,8 @@ const HeatmapDate = memo(({ date, easy, medium, hard }) => {
   });
 
   return (
-    <div className="flex items-center gap-4 mb-4">
-      <div className="w-32 text-sm text-retro-text uppercase font-bold">
+    <div className="grid grid-cols-[100px_1fr] md:grid-cols-[120px_1fr] gap-4 items-center group">
+      <div className="text-[10px] terminal-text opacity-40 group-hover:opacity-100 transition-opacity font-mono uppercase truncate">
         {formattedDate}
       </div>
       <div className="flex items-center gap-2">

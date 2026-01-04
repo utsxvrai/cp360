@@ -45,34 +45,38 @@ const POTDGrid = ({ refreshKey = 0 }) => {
 
   if (loading) {
     return (
-      <div className="retro-card text-center py-8">
-        <div className="animate-flicker uppercase">LOADING POTD...</div>
+      <div className="glass-panel p-12 flex flex-col items-center justify-center gap-4 bg-retro-bg/40">
+        <div className="w-12 h-12 border-2 border-retro-accent/20 border-t-retro-accent rounded-full animate-spin" />
+        <div className="terminal-text text-xs animate-pulse uppercase tracking-[0.2em]">Retrieving_POTD_Data...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="retro-card border-retro-hard text-retro-hard py-8 text-center">
-        <div className="uppercase">ERROR: {error}</div>
+      <div className="glass-panel p-8 border-retro-hard/30 bg-retro-hard/5">
+        <div className="flex items-center gap-3 text-retro-hard mb-2">
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span className="font-bold uppercase tracking-widest text-sm">System_Error</span>
+        </div>
+        <div className="text-retro-muted text-xs font-mono">{error}</div>
       </div>
     );
   }
 
   if (!potd) {
     return (
-      <div className="retro-card text-center py-8">
-        <div className="text-retro-muted uppercase">NO POTD AVAILABLE</div>
+      <div className="glass-panel p-12 text-center bg-retro-bg/40">
+        <div className="text-retro-muted uppercase tracking-[0.3em] text-xs font-mono opacity-50">Empty_Buffer: No_Tasks_Available</div>
       </div>
     );
   }
 
   return (
-    <section className="mb-12">
-      <h2 className="text-2xl uppercase tracking-widest mb-6 border-b-2 border-retro-border pb-2">
-        TODAY'S PROBLEMS
-      </h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <section className="animate-fade-in">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <POTDCard
           difficulty="Easy"
           contestId={potd.easy_contest_id}

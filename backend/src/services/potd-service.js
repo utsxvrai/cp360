@@ -4,61 +4,76 @@ const { DailyProblemRepository } = require('../repositories');
 const { formatDate } = require('../utils/date-helpers');
 
 // Algorithm: From each contest, select one Easy, one Medium, one Hard
-const selectProblemsFromContests = (contests, problemsByContest) => {
+// Algorithm: From each contest, select one Easy, one Medium, one Hard
+const selectProblemsFromContests = (contests, problemsByContest, usedProblems) => {
   let easyProblem = null;
   let mediumProblem = null;
   let hardProblem = null;
 
-  // Iterate through contests to find problems
+  const isUsedProblem = (contestId, index) => {
+    return usedProblems.has(`${contestId}-${index}`);
+  };
+
   for (const contest of contests) {
     const problems = problemsByContest[contest.id] || [];
-    
+
     for (const problem of problems) {
       const rating = problem.rating || 0;
-      
-      // Easy: 800-1000
-      if (!easyProblem && rating >= 800 && rating <= 1000) {
+
+      // Easy: 800–1000
+      if (
+        !easyProblem &&
+        rating >= 800 &&
+        rating <= 1000 &&
+        !isUsedProblem(contest.id, problem.index)
+      ) {
         easyProblem = {
           contestId: contest.id,
           index: problem.index,
-          rating: rating,
+          rating,
           name: problem.name,
         };
       }
-      
-      // Medium: 1100-1400
-      if (!mediumProblem && rating >= 1100 && rating <= 1400) {
+
+      // Medium: 1100–1400
+      if (
+        !mediumProblem &&
+        rating >= 1100 &&
+        rating <= 1400 &&
+        !isUsedProblem(contest.id, problem.index)
+      ) {
         mediumProblem = {
           contestId: contest.id,
           index: problem.index,
-          rating: rating,
+          rating,
           name: problem.name,
         };
       }
-      
-      // Hard: 1500-1600 (as per requirement: under 1600)
-      if (!hardProblem && rating >= 1500 && rating < 1600) {
+
+      // Hard: 1500–1599
+      if (
+        !hardProblem &&
+        rating >= 1500 &&
+        rating < 1600 &&
+        !isUsedProblem(contest.id, problem.index)
+      ) {
         hardProblem = {
           contestId: contest.id,
           index: problem.index,
-          rating: rating,
+          rating,
           name: problem.name,
         };
       }
-      
-      // If we found all three, we can stop
-      if (easyProblem && mediumProblem && hardProblem) {
-        break;
-      }
+
+      if (easyProblem && mediumProblem && hardProblem) break;
     }
-    
-    if (easyProblem && mediumProblem && hardProblem) {
-      break;
-    }
+
+    if (easyProblem && mediumProblem && hardProblem) break;
   }
 
   return { easyProblem, mediumProblem, hardProblem };
 };
+
 
 // Keep track of active generations to prevent duplicates
 const activeGenerations = new Map();
@@ -66,13 +81,11 @@ const activeGenerations = new Map();
 const generateDailyPOTD = async (date = null) => {
   const targetDate = date || formatDate(new Date());
 
-  // If a generation is already in progress for this date, wait for it
   if (activeGenerations.has(targetDate)) {
     Logger.info('POTD generation already in progress, waiting...', { date: targetDate });
     return activeGenerations.get(targetDate);
   }
 
-  // Placeholder to be resolved/rejected by the worker
   let resolveGen, rejectGen;
   const promise = new Promise((res, rej) => {
     resolveGen = res;
@@ -81,13 +94,10 @@ const generateDailyPOTD = async (date = null) => {
 
   activeGenerations.set(targetDate, promise);
 
-  // Start the actual generation worker
   (async () => {
     try {
-      // Check if POTD already exists for this date
       const exists = await DailyProblemRepository.checkDailyProblemSetExists(targetDate);
       if (exists) {
-        Logger.info('POTD already exists for date (checked by worker)', { date: targetDate });
         const data = await DailyProblemRepository.getDailyProblemSetByDate(targetDate);
         resolveGen(data);
         return;
@@ -95,30 +105,29 @@ const generateDailyPOTD = async (date = null) => {
 
       Logger.info('Generating daily POTD', { date: targetDate });
 
-      // Get recent contests - use 50 to ensure we find diverse problems
-      const contests = await CodeforcesService.getRecentContests(50);
-      if (contests.length === 0) {
-        throw new Error('No recent contests found from Codeforces API');
+      // ✅ FIX: fetch last 100 contests
+      const contests = await CodeforcesService.getRecentContests(100);
+      if (!contests.length) {
+        throw new Error('No recent contests found');
       }
 
-      // Fetch problems for each contest
+      // ✅ FIX: fetch already-used problems
+      const usedProblems = await DailyProblemRepository.getAllUsedProblemKeys();
+      // expected: Set { "1921-A", "1921-C", ... }
+
       const problemsByContest = {};
+
       for (const contest of contests) {
         try {
           const problems = await CodeforcesService.getContestProblems(contest.id);
-          if (problems && problems.length > 0) {
+          if (problems?.length) {
             problemsByContest[contest.id] = problems;
           }
-          
-          // Early exit check
-          const { easyProblem, mediumProblem, hardProblem } = selectProblemsFromContests(
-            contests,
-            problemsByContest
-          );
-          if (easyProblem && mediumProblem && hardProblem) {
-            Logger.info('Found all required problems early', { date: targetDate, contestCount: Object.keys(problemsByContest).length });
-            break;
-          }
+
+          const { easyProblem, mediumProblem, hardProblem } =
+            selectProblemsFromContests(contests, problemsByContest, usedProblems);
+
+          if (easyProblem && mediumProblem && hardProblem) break;
         } catch (error) {
           Logger.warn('Failed to fetch problems for contest', {
             contestId: contest.id,
@@ -127,17 +136,13 @@ const generateDailyPOTD = async (date = null) => {
         }
       }
 
-      // Final problem matching check
-      const { easyProblem, mediumProblem, hardProblem } = selectProblemsFromContests(
-        contests,
-        problemsByContest
-      );
+      const { easyProblem, mediumProblem, hardProblem } =
+        selectProblemsFromContests(contests, problemsByContest, usedProblems);
 
       if (!easyProblem || !mediumProblem || !hardProblem) {
-        throw new Error(`Could not find problems for all difficulty levels after scanning ${Object.keys(problemsByContest).length} contests`);
+        throw new Error('Exhausted problem pool in last 100 contests');
       }
 
-      // Create daily problem set
       const problemSet = {
         date: targetDate,
         easy_contest_id: easyProblem.contestId,
@@ -153,19 +158,23 @@ const generateDailyPOTD = async (date = null) => {
 
       const result = await DailyProblemRepository.createDailyProblemSet(problemSet);
       Logger.info('Daily POTD generated successfully', { date: targetDate });
-      
+
       resolveGen(result);
     } catch (error) {
-      Logger.error('Generate daily POTD worker failed', { date: targetDate, error: error.message, stack: error.stack });
+      Logger.error('Generate daily POTD worker failed', {
+        date: targetDate,
+        error: error.message,
+        stack: error.stack,
+      });
       rejectGen(error);
     } finally {
-      // Clean up the lock
       activeGenerations.delete(targetDate);
     }
   })();
 
   return promise;
 };
+
 
 module.exports = {
   generateDailyPOTD,

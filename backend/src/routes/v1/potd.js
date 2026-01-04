@@ -6,6 +6,7 @@ const router = express.Router();
 
 // Public routes
 router.get('/today', POTDController.getTodayPOTD);
+router.get('/past', POTDController.getPastPOTDs);
 router.get('/date/:date', POTDController.getPOTDByDate);
 
 // Protected routes (for admin/manual generation)

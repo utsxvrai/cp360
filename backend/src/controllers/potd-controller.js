@@ -88,9 +88,31 @@ const generatePOTD = async (req, res) => {
   }
 };
 
+const getPastPOTDs = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    const problemSets = await DailyProblemRepository.getRecentDailyProblemSets(limit);
+
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Past POTDs retrieved successfully',
+      error: {},
+      data: problemSets,
+    });
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || 'Failed to get past POTDs',
+      error: { message: error.message },
+      data: [],
+    });
+  }
+};
+
 module.exports = {
   getTodayPOTD,
   getPOTDByDate,
+  getPastPOTDs,
   generatePOTD,
 };
 

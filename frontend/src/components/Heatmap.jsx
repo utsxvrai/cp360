@@ -45,29 +45,34 @@ const Heatmap = ({ refresh = false }) => {
 
   if (loading) {
     return (
-      <div className="retro-card text-center py-8">
-        <div className="animate-flicker uppercase">LOADING HEATMAP...</div>
+      <div className="flex flex-col items-center justify-center py-8 gap-3">
+        <div className="w-8 h-8 border-2 border-retro-accent/10 border-t-retro-accent rounded-full animate-spin" />
+        <span className="terminal-text text-[10px] animate-pulse uppercase tracking-widest">Loading_Heatmap...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="retro-card border-retro-hard text-retro-hard py-8 text-center">
-        <div className="uppercase">ERROR: {error}</div>
+      <div className="p-4 border border-retro-hard/30 rounded-lg bg-retro-hard/5">
+        <div className="text-retro-hard text-[10px] font-bold uppercase tracking-widest">Buffer_Error</div>
+        <div className="text-retro-muted text-[10px] font-mono mt-1">{error}</div>
       </div>
     );
   }
 
   return (
-    <section>
-      <h2 className="text-2xl uppercase tracking-widest mb-6 border-b-2 border-retro-border pb-2">
-        ACTIVITY HEATMAP
-      </h2>
-      <div className="mb-4 text-retro-muted text-sm uppercase">
-        DATE | [E] EASY | [M] MEDIUM | [H] HARD
+    <div className="space-y-4 animate-fade-in">
+      <div className="grid grid-cols-[100px_1fr] md:grid-cols-[120px_1fr] gap-4 mb-2 opacity-50">
+        <div className="text-[8px] uppercase tracking-[0.2em] font-bold">TIMESTAMP</div>
+        <div className="flex gap-2">
+          {['E', 'M', 'H'].map(l => (
+            <div key={l} className="w-8 text-center text-[8px] uppercase tracking-[0.2em] font-bold">{l}</div>
+          ))}
+        </div>
       </div>
-      <div>
+      
+      <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
         {dates.map((dayData) => (
           <HeatmapDate
             key={dayData.date}
@@ -78,7 +83,7 @@ const Heatmap = ({ refresh = false }) => {
           />
         ))}
       </div>
-    </section>
+    </div>
   );
 };
 

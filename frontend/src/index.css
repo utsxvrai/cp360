@@ -1,98 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  * {
-    @apply border-retro-border;
-  }
-  
   body {
-    @apply bg-retro-bg text-retro-text font-mono;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-    font-family: 'Courier New', 'Courier', monospace;
+    @apply bg-retro-bg text-retro-text font-sans selection:bg-retro-accent selection:text-retro-bg overflow-x-hidden;
+    background-image: 
+      radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.05) 0%, transparent 50%),
+      linear-gradient(rgba(18, 18, 18, 0.8) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(18, 18, 18, 0.8) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
   }
 
-  /* RetroUI scanline overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-retro-bg;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-retro-border rounded-full hover:bg-retro-accent transition-colors;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-retro-card/60 backdrop-blur-md border border-retro-border rounded-xl shadow-neo transition-all duration-300;
+  }
+
+  .glass-panel:hover {
+    @apply border-retro-accent/30 shadow-glow-yellow;
+  }
+
+  .retro-button {
+    @apply px-6 py-2 bg-retro-accent text-retro-bg font-bold rounded-lg 
+           hover:shadow-glow-yellow active:scale-95 transition-all duration-200
+           disabled:bg-retro-disabled disabled:cursor-not-allowed uppercase tracking-wider text-sm;
+  }
+
+  .retro-button-outline {
+    @apply px-6 py-2 border-2 border-retro-accent text-retro-accent font-bold rounded-lg
+           hover:bg-retro-accent hover:text-retro-bg transition-all duration-200
+           active:scale-95 uppercase tracking-wider text-sm;
+  }
+
+  .scanline {
+    @apply fixed inset-0 pointer-events-none z-50 opacity-[0.03];
     background: linear-gradient(
+      to bottom,
       transparent 50%,
-      rgba(0, 0, 0, 0.03) 50%
+      rgba(255, 255, 255, 0.5) 51%,
+      transparent 51%
     );
     background-size: 100% 4px;
-    pointer-events: none;
-    z-index: 9999;
-    animation: scanline 8s linear infinite;
+    animation: scanline 20s linear infinite;
+  }
+
+  .terminal-text {
+    @apply font-mono text-retro-accent drop-shadow-[0_0_5px_rgba(251,191,36,0.5)];
+  }
+
+  .difficulty-tag {
+    @apply text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm;
+  }
+
+  /* Heatmap Specifics */
+  .heatmap-cell {
+    @apply w-full aspect-square rounded-[2px] transition-all duration-300 border border-transparent;
+  }
+
+  .heatmap-cell:hover {
+    @apply scale-110 z-10 border-white/20 shadow-lg;
   }
 }
 
 @layer utilities {
-  .retro-border {
-    @apply border-2 border-retro-border;
+  .text-glow {
+    text-shadow: 0 0 10px currentColor;
   }
   
-  .retro-box {
-    @apply retro-border bg-retro-bg p-4;
-    box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
-  }
-  
-  .retro-input {
-    @apply retro-border bg-retro-bg text-retro-text px-3 py-2;
-    @apply focus:outline-none;
-    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
-  }
-
-  .retro-input:focus {
-    border-color: #fbbf24;
-  }
-  
-  .retro-button {
-    @apply retro-border bg-retro-accent text-retro-bg px-6 py-2 uppercase tracking-wider;
-    @apply font-bold hover:opacity-90;
-    box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
-    transition: opacity 0.2s;
-  }
-  
-  .retro-button:active {
-    @apply transform translate-x-1 translate-y-1;
-    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
-  }
-
-  .retro-button-secondary {
-    @apply retro-border bg-retro-bg text-retro-text px-6 py-2 uppercase tracking-wider;
-    @apply font-bold hover:opacity-90;
-    box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
-    transition: opacity 0.2s;
-  }
-
-  .retro-button-secondary:active {
-    @apply transform translate-x-1 translate-y-1;
-    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
-  }
-  
-  .text-retro-muted {
-    color: #9ca3af;
-  }
-  
-  .text-retro-disabled {
-    color: #4b5563;
-  }
-
-  .retro-card {
-    @apply retro-border bg-retro-bg p-6;
-    box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
-  }
-
-  .retro-highlight {
-    @apply bg-retro-accent text-retro-bg px-2 py-1;
-    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+  .border-glow {
+    box-shadow: 0 0 15px currentColor;
   }
 }

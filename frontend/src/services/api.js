@@ -55,6 +55,10 @@ class ApiService {
     return this.request(`/potd/date/${date}`);
   }
 
+  async getPastPOTDs(limit = 10) {
+    return this.request(`/potd/past?limit=${limit}`);
+  }
+
   // Progress endpoints
   async getProgressForDate(date) {
     return this.request(`/progress/date/${date}`);
